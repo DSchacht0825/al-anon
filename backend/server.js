@@ -143,8 +143,10 @@ app.post('/api/login', async (req, res) => {
 // Get daily reading
 app.get('/api/daily-reading', async (req, res) => {
     try {
+        // Use Pacific Time (PST/PDT) for consistency with California users
         const today = new Date();
-        const dayOfYear = getDayOfYear(today);
+        const pacificTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Los_Angeles"}));
+        const dayOfYear = getDayOfYear(pacificTime);
 
         const reading = await db.get(
             'SELECT * FROM daily_readings WHERE day_of_year = ?',
@@ -155,7 +157,7 @@ app.get('/api/daily-reading', async (req, res) => {
             // Fallback to a default reading
             const defaultReading = {
                 day_of_year: dayOfYear,
-                date: today.toISOString().split('T')[0],
+                date: pacificTime.toISOString().split('T')[0],
                 book: 'Courage to Change',
                 title: 'One Day at a Time',
                 content: 'Just for today, I will try to live through this day only, and not tackle my whole life problem at once. I can do something for twelve hours that would appall me if I felt that I had to keep it up for a lifetime.',
@@ -164,8 +166,8 @@ app.get('/api/daily-reading', async (req, res) => {
             return res.json(defaultReading);
         }
 
-        // Add today's date to the response
-        reading.date = today.toISOString().split('T')[0];
+        // Add today's date to the response (in Pacific time)
+        reading.date = pacificTime.toISOString().split('T')[0];
         res.json(reading);
     } catch (error) {
         console.error('Daily reading error:', error);
