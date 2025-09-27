@@ -97,7 +97,9 @@ function showSuccess(message, elementId) {
 
 function formatDate(date) {
     // Handle the date string properly to avoid timezone issues
-    const dateObj = new Date(date + 'T12:00:00');
+    // Split the date and create a date object in local timezone
+    const [year, month, day] = date.split('-');
+    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     return dateObj.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
