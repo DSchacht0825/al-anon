@@ -25,6 +25,11 @@ async function initializeApp() {
         await database.connect();
         db = database;
         console.log('Database connected and initialized');
+
+        // Start server after database is ready
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Al-Anon Recovery App running on port ${PORT}`);
+        });
     } catch (error) {
         console.error('Failed to initialize database:', error);
         process.exit(1);
@@ -332,8 +337,4 @@ app.post('/api/steps/:stepNumber', authenticateToken, async (req, res) => {
 // Serve frontend
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-app.listen(PORT, () => {
-    console.log(`Al-Anon Recovery App running on port ${PORT}`);
 });
