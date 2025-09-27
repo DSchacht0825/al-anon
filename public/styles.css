@@ -46,9 +46,17 @@ body {
 }
 
 /* Authentication Styles */
+#auth-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
 .auth-container {
     max-width: 400px;
-    margin: 2rem auto;
+    width: 100%;
     padding: 2rem;
     background: white;
     border-radius: 20px;
