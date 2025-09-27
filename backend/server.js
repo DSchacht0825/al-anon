@@ -26,6 +26,9 @@ async function initializeApp() {
         db = database;
         console.log('Database connected and initialized');
 
+        // Seed daily readings if none exist
+        await seedReadingsIfEmpty();
+
         // Start server after database is ready
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`Al-Anon Recovery App running on port ${PORT}`);
@@ -33,6 +36,27 @@ async function initializeApp() {
     } catch (error) {
         console.error('Failed to initialize database:', error);
         process.exit(1);
+    }
+}
+
+// Auto-seed readings if database is empty
+async function seedReadingsIfEmpty() {
+    try {
+        const existingCount = await db.get('SELECT COUNT(*) as count FROM daily_readings');
+        if (existingCount.count === 0) {
+            console.log('Seeding daily readings...');
+            const readings = generateYearlyReadings();
+
+            for (const reading of readings) {
+                await db.run(
+                    'INSERT INTO daily_readings (day_of_year, book, title, content, page_number) VALUES (?, ?, ?, ?, ?)',
+                    [reading.day_of_year, reading.book, reading.title, reading.content, reading.page_number]
+                );
+            }
+            console.log(`Seeded ${readings.length} daily readings`);
+        }
+    } catch (error) {
+        console.log('Note: Could not auto-seed readings:', error.message);
     }
 }
 
@@ -162,10 +186,23 @@ app.post('/api/admin/seed-readings', async (req, res) => {
         const readings = generateYearlyReadings();
 
         for (const reading of readings) {
-            await db.run(
-                'INSERT INTO daily_readings (day_of_year, book, title, content, page_number) VALUES (?, ?, ?, ?, ?) ON CONFLICT (day_of_year) DO UPDATE SET book = EXCLUDED.book, title = EXCLUDED.title, content = EXCLUDED.content, page_number = EXCLUDED.page_number',
-                [reading.day_of_year, reading.book, reading.title, reading.content, reading.page_number]
-            );
+            try {
+                // Try PostgreSQL syntax first
+                await db.run(
+                    'INSERT INTO daily_readings (day_of_year, book, title, content, page_number) VALUES (?, ?, ?, ?, ?) ON CONFLICT (day_of_year) DO UPDATE SET book = EXCLUDED.book, title = EXCLUDED.title, content = EXCLUDED.content, page_number = EXCLUDED.page_number',
+                    [reading.day_of_year, reading.book, reading.title, reading.content, reading.page_number]
+                );
+            } catch (error) {
+                // Fallback to simple insert for SQLite
+                try {
+                    await db.run(
+                        'INSERT INTO daily_readings (day_of_year, book, title, content, page_number) VALUES (?, ?, ?, ?, ?)',
+                        [reading.day_of_year, reading.book, reading.title, reading.content, reading.page_number]
+                    );
+                } catch (insertError) {
+                    console.log(`Skipping duplicate day ${reading.day_of_year}`);
+                }
+            }
         }
 
         res.json({ message: `Seeded ${readings.length} daily readings` });

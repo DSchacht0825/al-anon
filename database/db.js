@@ -28,6 +28,16 @@ class Database {
         }
 
         await this.initializeDatabase();
+
+        // Migrate existing daily_readings table if needed
+        if (this.isProduction) {
+            try {
+                await this.run('ALTER TABLE daily_readings ADD COLUMN IF NOT EXISTS day_of_year INTEGER');
+                await this.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_readings_day_of_year ON daily_readings(day_of_year)');
+            } catch (error) {
+                console.log('Migration note:', error.message);
+            }
+        }
     }
 
     async initializeDatabase() {
