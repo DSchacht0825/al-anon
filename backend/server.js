@@ -144,8 +144,16 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/daily-reading', async (req, res) => {
     try {
         // Use Pacific Time (PST/PDT) for consistency with California users
-        const today = new Date();
-        const pacificTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Los_Angeles"}));
+        const now = new Date();
+        // Get current time in Pacific timezone
+        const pacificDate = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Los_Angeles',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(now);
+
+        const pacificTime = new Date(pacificDate + 'T00:00:00');
         const dayOfYear = getDayOfYear(pacificTime);
 
         const reading = await db.get(
@@ -167,7 +175,7 @@ app.get('/api/daily-reading', async (req, res) => {
         }
 
         // Add today's date to the response (in Pacific time)
-        reading.date = pacificTime.toISOString().split('T')[0];
+        reading.date = pacificDate;
         res.json(reading);
     } catch (error) {
         console.error('Daily reading error:', error);

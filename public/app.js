@@ -96,7 +96,9 @@ function showSuccess(message, elementId) {
 }
 
 function formatDate(date) {
-    return new Date(date).toLocaleDateString('en-US', {
+    // Handle the date string properly to avoid timezone issues
+    const dateObj = new Date(date + 'T12:00:00');
+    return dateObj.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
