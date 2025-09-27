@@ -204,12 +204,17 @@ function showMainApp() {
     showTab('daily');
 }
 
-function showTab(tabName) {
+function showTab(tabName, event = null) {
     // Update tab buttons
     document.querySelectorAll('.main-tab').forEach(tab => {
         tab.classList.remove('active');
     });
-    event.target.classList.add('active');
+
+    // Find and activate the correct tab
+    const activeTab = event ? event.target : document.querySelector(`[onclick="showTab('${tabName}')"]`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
 
     // Update tab content
     document.querySelectorAll('.tab-content').forEach(content => {
