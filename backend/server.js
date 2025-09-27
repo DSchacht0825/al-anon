@@ -162,16 +162,10 @@ app.get('/api/daily-reading', async (req, res) => {
         );
 
         if (!reading) {
-            // Fallback to a default reading
-            const defaultReading = {
-                day_of_year: dayOfYear,
-                date: pacificTime.toISOString().split('T')[0],
-                book: 'Courage to Change',
-                title: 'One Day at a Time',
-                content: 'Just for today, I will try to live through this day only, and not tackle my whole life problem at once. I can do something for twelve hours that would appall me if I felt that I had to keep it up for a lifetime.',
-                page_number: dayOfYear
-            };
-            return res.json(defaultReading);
+            // Fallback: generate a unique reading for this day
+            const generatedReading = generateDailyReading(dayOfYear);
+            generatedReading.date = pacificDate;
+            return res.json(generatedReading);
         }
 
         // Add today's date to the response (in Pacific time)
@@ -188,6 +182,64 @@ function getDayOfYear(date) {
     const start = new Date(date.getFullYear(), 0, 1);
     const diff = date - start;
     return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+}
+
+// Generate a single daily reading for a specific day
+function generateDailyReading(dayOfYear) {
+    const alAnonThemes = [
+        'Acceptance', 'Letting Go', 'Serenity', 'One Day at a Time', 'Progress Not Perfection',
+        'Keep It Simple', 'Courage to Change', 'Detachment', 'Self-Care', 'Gratitude',
+        'Hope', 'Faith', 'Trust', 'Boundaries', 'Inner Peace', 'Recovery', 'Wisdom',
+        'Compassion', 'Understanding', 'Forgiveness', 'Strength', 'Growth', 'Healing'
+    ];
+
+    const sampleReadings = [
+        {
+            title: 'Acceptance',
+            content: 'Acceptance is the answer to all my problems today. When I am disturbed, it is because I find some person, place, thing or situation unacceptable to me. I can find no serenity until I accept that person, place, thing or situation as being exactly the way it is supposed to be at this moment.'
+        },
+        {
+            title: 'One Day at a Time',
+            content: 'Just for today, I will try to live through this day only, and not tackle my whole life problem at once. I can do something for twelve hours that would appall me if I felt that I had to keep it up for a lifetime.'
+        },
+        {
+            title: 'Letting Go',
+            content: 'Letting go means realizing that some people are a part of your history, but not a part of your destiny. In Al-Anon, I learn that I am powerless over other people and their choices.'
+        },
+        {
+            title: 'Serenity',
+            content: 'God, grant me the serenity to accept the things I cannot change, the courage to change the things I can, and the wisdom to know the difference.'
+        },
+        {
+            title: 'Progress Not Perfection',
+            content: 'I strive for progress, not perfection. Each day I take small steps forward in my recovery, knowing that growth is a journey, not a destination.'
+        },
+        {
+            title: 'Detachment',
+            content: 'Detachment is not that I do not care. It is that I learn to love, care, and be involved without going crazy. I detach from the outcome and focus on my own recovery.'
+        },
+        {
+            title: 'Self-Care',
+            content: 'Taking care of myself is not selfish. It is essential. When I nurture my own well-being, I am better able to support others in healthy ways.'
+        },
+        {
+            title: 'Gratitude',
+            content: 'Today I choose to focus on gratitude. Even in difficult times, there are blessings to be found. Gratitude transforms my perspective and opens my heart to possibilities.'
+        }
+    ];
+
+    const themeIndex = (dayOfYear - 1) % alAnonThemes.length;
+    const readingIndex = (dayOfYear - 1) % sampleReadings.length;
+    const theme = alAnonThemes[themeIndex];
+    const reading = sampleReadings[readingIndex];
+
+    return {
+        day_of_year: dayOfYear,
+        book: 'Courage to Change',
+        title: `${theme} - Day ${dayOfYear}`,
+        content: reading.content,
+        page_number: dayOfYear
+    };
 }
 
 // Seed daily readings (admin endpoint)
