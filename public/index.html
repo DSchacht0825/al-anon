@@ -116,8 +116,13 @@
                 <!-- Journal Tab -->
                 <div id="journal-tab" class="tab-content hidden">
                     <div class="journal-container">
-                        <h3>Daily Journal</h3>
-                        <p class="journal-date" id="journal-date"></p>
+                        <div class="journal-header">
+                            <div>
+                                <h3>Daily Journal</h3>
+                                <p class="journal-date" id="journal-date"></p>
+                            </div>
+                            <button onclick="showJournalHistory()" class="btn-secondary btn-small">Previous Entries</button>
+                        </div>
 
                         <div class="journal-section">
                             <h4>🌅 Morning Intention</h4>
@@ -154,6 +159,24 @@
                     </div>
                 </div>
             </main>
+        </div>
+
+        <!-- Journal History Modal -->
+        <div id="journal-history-modal" class="modal hidden">
+            <div class="modal-content journal-history-content">
+                <div class="modal-header">
+                    <h3>Previous Journal Entries</h3>
+                    <button onclick="closeJournalHistory()" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="journal-history-list" class="journal-history-list">
+                        <!-- History entries will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeJournalHistory()" class="btn-secondary">Close</button>
+                </div>
+            </div>
         </div>
 
         <!-- Step Modal -->

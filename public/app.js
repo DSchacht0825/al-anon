@@ -256,6 +256,57 @@ async function loadJournalEntry() {
     }
 }
 
+// Journal History functions
+async function showJournalHistory() {
+    try {
+        const entries = await apiCall('/journal/history');
+        renderJournalHistory(entries);
+        document.getElementById('journal-history-modal').classList.remove('hidden');
+    } catch (error) {
+        console.error('Error loading journal history:', error);
+        showError('Failed to load journal history. Please try again.');
+    }
+}
+
+function renderJournalHistory(entries) {
+    const container = document.getElementById('journal-history-list');
+
+    if (entries.length === 0) {
+        container.innerHTML = '<p class="no-entries">No previous journal entries found.</p>';
+        return;
+    }
+
+    container.innerHTML = entries.map(entry => `
+        <div class="journal-history-entry">
+            <div class="journal-history-date">${formatDate(entry.date)}</div>
+            <div class="journal-history-content">
+                ${entry.morning_intention ? `
+                    <div class="journal-history-section">
+                        <h5>🌅 Morning Intention</h5>
+                        <p>${entry.morning_intention}</p>
+                    </div>
+                ` : ''}
+                ${entry.evening_reflection ? `
+                    <div class="journal-history-section">
+                        <h5>🌙 Evening Reflection</h5>
+                        <p>${entry.evening_reflection}</p>
+                    </div>
+                ` : ''}
+                ${entry.gratitude ? `
+                    <div class="journal-history-section">
+                        <h5>🙏 Gratitude</h5>
+                        <p>${entry.gratitude}</p>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function closeJournalHistory() {
+    document.getElementById('journal-history-modal').classList.add('hidden');
+}
+
 async function saveJournal() {
     try {
         const journalData = {
@@ -513,10 +564,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// Handle clicks outside modal
+// Handle clicks outside modals
 document.getElementById('step-modal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeStepModal();
+    }
+});
+
+document.getElementById('journal-history-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeJournalHistory();
     }
 });
 

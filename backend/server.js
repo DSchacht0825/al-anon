@@ -162,6 +162,21 @@ app.get('/api/journal/today', authenticateToken, async (req, res) => {
     }
 });
 
+// Get journal history
+app.get('/api/journal/history', authenticateToken, async (req, res) => {
+    try {
+        const entries = await db.all(
+            'SELECT * FROM journal_entries WHERE user_id = ? ORDER BY date DESC LIMIT 30',
+            [req.user.userId]
+        );
+
+        res.json(entries);
+    } catch (error) {
+        console.error('Journal history error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Save/update journal entry
 app.post('/api/journal', authenticateToken, async (req, res) => {
     try {
