@@ -119,31 +119,132 @@ app.post('/api/login', async (req, res) => {
 // Get daily reading
 app.get('/api/daily-reading', async (req, res) => {
     try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date();
+        const dayOfYear = getDayOfYear(today);
 
         const reading = await db.get(
-            'SELECT * FROM daily_readings WHERE date = ?',
-            [today]
+            'SELECT * FROM daily_readings WHERE day_of_year = ?',
+            [dayOfYear]
         );
 
         if (!reading) {
-            // Return a default reading if none exists for today
+            // Fallback to a default reading
             const defaultReading = {
-                date: today,
+                day_of_year: dayOfYear,
+                date: today.toISOString().split('T')[0],
                 book: 'Courage to Change',
                 title: 'One Day at a Time',
                 content: 'Just for today, I will try to live through this day only, and not tackle my whole life problem at once. I can do something for twelve hours that would appall me if I felt that I had to keep it up for a lifetime.',
-                page_number: 1
+                page_number: dayOfYear
             };
             return res.json(defaultReading);
         }
 
+        // Add today's date to the response
+        reading.date = today.toISOString().split('T')[0];
         res.json(reading);
     } catch (error) {
         console.error('Daily reading error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+// Helper function to get day of year (1-366)
+function getDayOfYear(date) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+// Seed daily readings (admin endpoint)
+app.post('/api/admin/seed-readings', async (req, res) => {
+    try {
+        const readings = generateYearlyReadings();
+
+        for (const reading of readings) {
+            await db.run(
+                'INSERT INTO daily_readings (day_of_year, book, title, content, page_number) VALUES (?, ?, ?, ?, ?) ON CONFLICT (day_of_year) DO UPDATE SET book = EXCLUDED.book, title = EXCLUDED.title, content = EXCLUDED.content, page_number = EXCLUDED.page_number',
+                [reading.day_of_year, reading.book, reading.title, reading.content, reading.page_number]
+            );
+        }
+
+        res.json({ message: `Seeded ${readings.length} daily readings` });
+    } catch (error) {
+        console.error('Seeding error:', error);
+        res.status(500).json({ error: 'Failed to seed readings' });
+    }
+});
+
+// Generate yearly readings
+function generateYearlyReadings() {
+    const readings = [];
+    const alAnonThemes = [
+        'Acceptance', 'Letting Go', 'Serenity', 'One Day at a Time', 'Progress Not Perfection',
+        'Keep It Simple', 'Courage to Change', 'Detachment', 'Self-Care', 'Gratitude',
+        'Hope', 'Faith', 'Trust', 'Boundaries', 'Inner Peace', 'Recovery', 'Wisdom',
+        'Compassion', 'Understanding', 'Forgiveness', 'Strength', 'Growth', 'Healing'
+    ];
+
+    const sampleReadings = [
+        {
+            title: 'Acceptance',
+            content: 'Acceptance is the answer to all my problems today. When I am disturbed, it is because I find some person, place, thing or situation unacceptable to me. I can find no serenity until I accept that person, place, thing or situation as being exactly the way it is supposed to be at this moment.'
+        },
+        {
+            title: 'One Day at a Time',
+            content: 'Just for today, I will try to live through this day only, and not tackle my whole life problem at once. I can do something for twelve hours that would appall me if I felt that I had to keep it up for a lifetime.'
+        },
+        {
+            title: 'Letting Go',
+            content: 'Letting go means realizing that some people are a part of your history, but not a part of your destiny. In Al-Anon, I learn that I am powerless over other people and their choices.'
+        },
+        {
+            title: 'Serenity',
+            content: 'God, grant me the serenity to accept the things I cannot change, the courage to change the things I can, and the wisdom to know the difference.'
+        },
+        {
+            title: 'Progress Not Perfection',
+            content: 'I strive for progress, not perfection. Each day I take small steps forward in my recovery, knowing that growth is a journey, not a destination.'
+        },
+        {
+            title: 'Detachment',
+            content: 'Detachment is not that I do not care. It is that I learn to love, care, and be involved without going crazy. I detach from the outcome and focus on my own recovery.'
+        },
+        {
+            title: 'Self-Care',
+            content: 'Taking care of myself is not selfish. It is essential. When I nurture my own well-being, I am better able to support others in healthy ways.'
+        },
+        {
+            title: 'Gratitude',
+            content: 'Gratitude turns what we have into enough. Today I will focus on the blessings in my life, no matter how small they may seem.'
+        },
+        {
+            title: 'Courage to Change',
+            content: 'The courage to change the things I can begins with changing myself. I cannot control others, but I can control my reactions and choices.'
+        },
+        {
+            title: 'Keep It Simple',
+            content: 'Life is as complicated as I make it. Today I will keep things simple and focus on what truly matters in my recovery journey.'
+        }
+    ];
+
+    for (let day = 1; day <= 366; day++) {
+        const themeIndex = (day - 1) % alAnonThemes.length;
+        const readingIndex = (day - 1) % sampleReadings.length;
+        const theme = alAnonThemes[themeIndex];
+        const reading = sampleReadings[readingIndex];
+
+        readings.push({
+            day_of_year: day,
+            book: 'Courage to Change',
+            title: `${theme} - Day ${day}`,
+            content: reading.content,
+            page_number: day
+        });
+    }
+
+    return readings;
+}
 
 // Get journal entry for today
 app.get('/api/journal/today', authenticateToken, async (req, res) => {

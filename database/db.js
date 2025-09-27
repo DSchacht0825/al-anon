@@ -75,7 +75,7 @@ class Database {
             // Daily readings table
             `CREATE TABLE IF NOT EXISTS daily_readings (
                 id SERIAL PRIMARY KEY,
-                date DATE NOT NULL,
+                day_of_year INTEGER UNIQUE NOT NULL,
                 book TEXT NOT NULL,
                 title TEXT,
                 content TEXT NOT NULL,
