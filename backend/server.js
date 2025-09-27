@@ -177,9 +177,9 @@ app.get('/api/daily-reading', async (req, res) => {
 
 // Helper function to get day of year (1-366)
 function getDayOfYear(date) {
-    const start = new Date(date.getFullYear(), 0, 0);
+    const start = new Date(date.getFullYear(), 0, 1);
     const diff = date - start;
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
+    return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
 }
 
 // Seed daily readings (admin endpoint)
