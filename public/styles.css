@@ -178,9 +178,24 @@ body {
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
 }
 
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #667eea;
+}
+
 .nav-brand h2 {
     color: #667eea;
     font-weight: 600;
+    margin: 0;
 }
 
 .nav-user {
