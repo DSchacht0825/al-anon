@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Anon Recovery Companion</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading your recovery companion...</p>
+        </div>
+
+        <!-- Login/Register Screen -->
+        <div id="auth-screen" class="screen hidden">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>🌅 Al-Anon Recovery Companion</h1>
+                    <p>Your daily companion for recovery and growth</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="showLogin()">Login</button>
+                    <button class="tab-btn" onclick="showRegister()">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label for="register-first-name">First Name</label>
+                        <input type="text" id="register-first-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primary">Create Account</button>
+                </form>
+
+                <div id="auth-error" class="error-message hidden"></div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="screen hidden">
+            <!-- Navigation -->
+            <nav class="nav">
+                <div class="nav-brand">
+                    <h2>🌅 Recovery Companion</h2>
+                </div>
+                <div class="nav-user">
+                    <span id="user-greeting">Welcome back!</span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main">
+                <!-- Tab Navigation -->
+                <div class="main-tabs">
+                    <button class="main-tab active" onclick="showTab('daily')">Daily Reading</button>
+                    <button class="main-tab" onclick="showTab('journal')">Journal</button>
+                    <button class="main-tab" onclick="showTab('steps')">12 Steps</button>
+                </div>
+
+                <!-- Daily Reading Tab -->
+                <div id="daily-tab" class="tab-content">
+                    <div class="daily-reading-card">
+                        <div class="reading-header">
+                            <h3 id="reading-title">Daily Reading</h3>
+                            <p class="reading-date" id="reading-date"></p>
+                            <p class="reading-book" id="reading-book"></p>
+                        </div>
+                        <div class="reading-content">
+                            <p id="reading-text">Loading today's reading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Journal Tab -->
+                <div id="journal-tab" class="tab-content hidden">
+                    <div class="journal-container">
+                        <h3>Daily Journal</h3>
+                        <p class="journal-date" id="journal-date"></p>
+
+                        <div class="journal-section">
+                            <h4>🌅 Morning Intention</h4>
+                            <p class="section-subtitle">What do you hope to focus on today?</p>
+                            <textarea id="morning-intention" placeholder="Set your intention for today..."></textarea>
+                        </div>
+
+                        <div class="journal-section">
+                            <h4>🌙 Evening Reflection</h4>
+                            <p class="section-subtitle">How did today go? What did you learn?</p>
+                            <textarea id="evening-reflection" placeholder="Reflect on your day..."></textarea>
+                        </div>
+
+                        <div class="journal-section">
+                            <h4>🙏 Gratitude</h4>
+                            <p class="section-subtitle">What are you grateful for today?</p>
+                            <textarea id="gratitude" placeholder="I am grateful for..."></textarea>
+                        </div>
+
+                        <button onclick="saveJournal()" class="btn-primary">Save Entry</button>
+                        <div id="journal-message" class="success-message hidden"></div>
+                    </div>
+                </div>
+
+                <!-- 12 Steps Tab -->
+                <div id="steps-tab" class="tab-content hidden">
+                    <div class="steps-container">
+                        <h3>The 12 Steps of Al-Anon</h3>
+                        <p class="steps-intro">Track your progress through the 12 steps of recovery.</p>
+
+                        <div id="steps-list" class="steps-list">
+                            <!-- Steps will be dynamically generated -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Step Modal -->
+        <div id="step-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-step-title">Step 1</h3>
+                    <button onclick="closeStepModal()" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-step-text"></p>
+
+                    <!-- Step Work Entries Section -->
+                    <div class="step-work-section">
+                        <h4>📝 Ongoing Step Work</h4>
+                        <p class="section-subtitle">Add your ongoing reflections and insights for this step</p>
+
+                        <div id="step-entries-list" class="step-entries">
+                            <!-- Entries will be loaded here -->
+                        </div>
+
+                        <div class="add-entry-section">
+                            <textarea id="new-step-entry" placeholder="Add a new reflection or insight about this step..." rows="3"></textarea>
+                            <div class="entry-actions">
+                                <button type="button" onclick="addStepEntry()" id="add-entry-btn" class="btn-small btn-primary">Add Entry</button>
+                                <button type="button" onclick="cancelEdit()" id="cancel-edit-btn" class="btn-small btn-secondary" style="display: none;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-notes">
+                        <label for="step-notes">General Notes & Reflections:</label>
+                        <textarea id="step-notes" placeholder="Write your general thoughts about this step..."></textarea>
+                    </div>
+                    <div class="step-completion">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="step-completed">
+                            I have worked on this step
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="saveStepProgress()" class="btn-primary">Save Progress</button>
+                    <button onclick="closeStepModal()" class="btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
