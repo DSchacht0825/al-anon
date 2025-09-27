@@ -222,6 +222,23 @@ body {
     gap: 1rem;
 }
 
+.find-meeting-link {
+    padding: 0.5rem 1rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.find-meeting-link:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 .nav-user span {
     color: #666;
     font-weight: 500;
