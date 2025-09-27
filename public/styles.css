@@ -375,7 +375,7 @@ body {
     border: 2px solid #e0e0e0;
     border-radius: 12px;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 1.1rem;
     line-height: 1.6;
     resize: vertical;
     transition: border-color 0.3s ease;
@@ -535,6 +535,8 @@ body {
     border: 2px solid #e0e0e0;
     border-radius: 10px;
     font-family: inherit;
+    font-size: 1.1rem;
+    line-height: 1.6;
     resize: vertical;
 }
 
@@ -670,6 +672,8 @@ body {
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-family: inherit;
+    font-size: 1.1rem;
+    line-height: 1.6;
     resize: vertical;
     margin-bottom: 0.75rem;
     transition: border-color 0.3s ease;
